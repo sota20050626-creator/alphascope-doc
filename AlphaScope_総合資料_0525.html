@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AlphaScope — 総合資料</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap');
+  * { margin:0;padding:0;box-sizing:border-box; }
+  body { background:#0a0f1a;font-family:'Noto Sans JP',sans-serif;color:#e0e0e0; }
+
+  /* Nav */
+  .nav { position:fixed;top:0;left:0;right:0;background:rgba(10,15,26,.95);backdrop-filter:blur(10px);z-index:100;border-bottom:1px solid rgba(212,168,67,.2);padding:0 24px; }
+  .nav-inner { max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:0;height:52px;overflow-x:auto; }
+  .nav-logo { font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:#D4A843;margin-right:32px;flex-shrink:0; }
+  .nav-btn { font-size:12px;color:#8B9BB4;padding:0 14px;height:52px;display:flex;align-items:center;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;flex-shrink:0;text-decoration:none; }
+  .nav-btn:hover { color:#fff; }
+  .nav-btn.active { color:#D4A843;border-bottom-color:#D4A843; }
+
+  /* Layout */
+  .main { max-width:1100px;margin:0 auto;padding:80px 24px 60px; }
+
+  /* Chapter headers */
+  .chapter { margin-bottom:64px; }
+  .chapter-header { display:flex;align-items:center;gap:16px;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid rgba(212,168,67,.2); }
+  .chapter-num { font-family:'Space Mono',monospace;font-size:11px;color:#D4A843;background:rgba(212,168,67,.1);border:1px solid rgba(212,168,67,.3);border-radius:6px;padding:4px 12px;flex-shrink:0; }
+  .chapter-title { font-size:26px;font-weight:700;color:#fff; }
+  .chapter-desc { font-size:13px;color:#8B9BB4;margin-top:4px; }
+
+  /* Section title */
+  .sec { margin-bottom:40px; }
+  .sec-title { font-family:'Space Mono',monospace;font-size:10px;letter-spacing:3px;color:#D4A843;margin-bottom:18px;display:flex;align-items:center;gap:10px; }
+  .sec-title::after { content:'';flex:1;height:1px;background:rgba(212,168,67,.15); }
+
+  /* Cards */
+  .cards { display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px; }
+  .card { background:#1B2E45;border-radius:12px;padding:20px;border:1px solid rgba(255,255,255,.06);position:relative;overflow:hidden; }
+  .card::before { content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent,#D4A843); }
+  .card-tag { font-size:10px;font-weight:700;letter-spacing:1px;color:var(--accent,#D4A843);margin-bottom:7px;font-family:'Space Mono',monospace; }
+  .card-name { font-size:17px;font-weight:700;color:#fff;margin-bottom:6px; }
+  .card-desc { font-size:12px;color:#8B9BB4;line-height:1.7;margin-bottom:12px; }
+
+  /* Detail rows */
+  .dr { display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:12px; }
+  .dr:last-child { border-bottom:none; }
+  .dk { color:#8B9BB4; }
+  .dv { font-weight:500;text-align:right; }
+  .dv.g { color:#57F287; } .dv.y { color:#FEE75C; } .dv.r { color:#ED4245; }
+
+  /* Badges */
+  .badge-row { display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px; }
+  .badge { font-size:10px;padding:3px 8px;border-radius:4px;font-weight:700; }
+  .bf { background:rgba(45,158,107,.2);color:#57F287; }
+  .bp { background:rgba(224,123,57,.2);color:#FEE75C; }
+  .br { background:rgba(88,101,242,.2);color:#8a95ff; }
+  .bl { background:rgba(139,155,180,.2);color:#8B9BB4; }
+
+  /* Tables */
+  .table-wrap { background:#1B2E45;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.06);overflow-x:auto; }
+  table { width:100%;border-collapse:collapse;min-width:600px; }
+  th { background:#0D1B2A;padding:11px 14px;font-size:11px;font-weight:700;color:#D4A843;text-align:left;letter-spacing:1px;font-family:'Space Mono',monospace; }
+  td { padding:11px 14px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle; }
+  tr:last-child td { border-bottom:none; }
+  tr:nth-child(even) td { background:rgba(255,255,255,.02); }
+  td.tn { color:#fff;font-weight:700; }
+  td.tg { color:#57F287; } td.ty { color:#FEE75C; } td.tr { color:#ED4245; } td.tgr { color:#8B9BB4; }
+
+  /* Method block */
+  .method { background:#1B2E45;border-radius:14px;padding:24px;margin-bottom:20px;border:1px solid rgba(255,255,255,.06);position:relative;overflow:hidden; }
+  .method::before { content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--accent,#D4A843); }
+  .method-header { display:flex;align-items:flex-start;gap:14px;margin-bottom:18px; }
+  .method-num { font-family:'Space Mono',monospace;font-size:10px;color:var(--accent,#D4A843);background:rgba(255,255,255,.06);border-radius:6px;padding:3px 8px;flex-shrink:0; }
+  .method-title { font-size:18px;font-weight:700;color:#fff; }
+  .method-sub { font-size:12px;color:#8B9BB4;margin-top:2px; }
+  .method-grid { display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px; }
+  .method-box { background:rgba(255,255,255,.04);border-radius:10px;padding:14px; }
+  .box-title { font-size:10px;font-weight:700;letter-spacing:1px;margin-bottom:9px;font-family:'Space Mono',monospace; }
+  .box-title.g { color:#57F287; } .box-title.y { color:#FEE75C; } .box-title.b { color:#8a95ff; }
+  .bi { display:flex;gap:7px;margin-bottom:6px;font-size:12px;color:#b0b0b0;line-height:1.6;align-items:flex-start; }
+  .bi:last-child { margin-bottom:0; }
+  .bd { width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:7px; }
+  .bd.g { background:#57F287; } .bd.y { background:#FEE75C; } .bd.r { background:#ED4245; }
+
+  /* Timeline */
+  .timeline { background:rgba(255,255,255,.03);border-radius:10px;padding:14px 18px; }
+  .tl-label { font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;color:#8B9BB4;margin-bottom:12px; }
+  .tl-item { display:flex;gap:12px;margin-bottom:10px;align-items:flex-start; }
+  .tl-item:last-child { margin-bottom:0; }
+  .tl-left { display:flex;flex-direction:column;align-items:center;flex-shrink:0; }
+  .tl-dot { width:9px;height:9px;border-radius:50%;flex-shrink:0; }
+  .tl-line { width:2px;flex:1;min-height:14px;margin:3px 0;opacity:.25; }
+  .tl-time { font-family:'Space Mono',monospace;font-size:11px;color:#8B9BB4;flex-shrink:0;min-width:38px; }
+  .tl-name { font-size:13px;font-weight:700;margin-bottom:2px; }
+  .tl-desc { font-size:12px;color:#8B9BB4;line-height:1.6; }
+
+  /* Phase badges */
+  .pb-row { display:flex;flex-wrap:wrap;gap:7px;margin-top:14px; }
+  .pb { font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px; }
+  .pb.g { background:rgba(45,158,107,.2);color:#57F287; }
+  .pb.y { background:rgba(212,168,67,.2);color:#D4A843; }
+  .pb.b { background:rgba(88,101,242,.2);color:#8a95ff; }
+  .pb.r { background:rgba(237,66,69,.2);color:#ED4245; }
+
+  /* Recommend */
+  .recommend { background:linear-gradient(135deg,#1a2535,#0d1b2a);border:1px solid rgba(212,168,67,.3);border-radius:14px;padding:24px; }
+  .rec-label { font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;color:#D4A843;margin-bottom:12px; }
+  .rec-title { font-size:18px;font-weight:700;color:#fff;margin-bottom:14px; }
+  .rec-item { display:flex;gap:10px;margin-bottom:11px;align-items:flex-start; }
+  .rec-item:last-child { margin-bottom:0; }
+  .rec-icon { font-size:15px;flex-shrink:0; }
+  .rec-text { font-size:13px;color:#d0d0d0;line-height:1.7; }
+  .rec-text strong { color:#F0C96A; }
+
+  /* Summary items */
+  .sum-item { display:flex;gap:12px;margin-bottom:12px;align-items:flex-start; }
+  .sum-item:last-child { margin-bottom:0; }
+  .sum-dot { width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:6px; }
+  .sum-text { font-size:14px;color:#d0d0d0;line-height:1.8; }
+  .sum-text strong { color:#fff; }
+
+  /* Role box */
+  .role-box { background:#0D1B2A;border-radius:10px;padding:18px 22px; }
+  .role-row { display:flex;gap:10px;margin-bottom:10px;align-items:flex-start; }
+  .role-row:last-child { margin-bottom:0; }
+  .role-icon { font-size:15px;flex-shrink:0; }
+  .role-text { font-size:13px;color:#d0d0d0;line-height:1.7; }
+  .role-text strong { color:#F0C96A; }
+
+  /* Pricing */
+  .pricing { display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px; }
+  .pc { border-radius:10px;padding:16px;text-align:center;border:1px solid rgba(255,255,255,.06); }
+  .pc.p1 { background:#1B2E45; }
+  .pc.p2 { background:#0D1B2A; }
+  .pc.p3 { background:#122030; }
+  .pc-period { font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:#8B9BB4;margin-bottom:8px; }
+  .pc-val { font-size:22px;font-weight:700;color:#D4A843;margin-bottom:4px; }
+  .pc-sub { font-size:11px;color:#8B9BB4; }
+
+  /* Flow */
+  .flow { display:flex;flex-direction:column;gap:0; }
+  .flow-item { display:flex;gap:14px;align-items:flex-start; }
+  .flow-left { display:flex;flex-direction:column;align-items:center;flex-shrink:0; }
+  .flow-circle { width:34px;height:34px;border-radius:50%;background:#1B2E45;border:1px solid rgba(212,168,67,.3);display:flex;align-items:center;justify-content:center;font-size:15px; }
+  .flow-line { width:2px;flex:1;min-height:18px;margin:3px 0;background:rgba(212,168,67,.2); }
+  .flow-content { padding-bottom:18px;flex:1; }
+  .flow-title { font-size:14px;font-weight:700;color:#fff;margin-bottom:3px; }
+  .flow-desc { font-size:12px;color:#8B9BB4;line-height:1.7; }
+
+  /* Cost grid */
+  .cost-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:14px; }
+  .cost-card { background:#1B2E45;border-radius:12px;padding:18px;text-align:center;border:1px solid rgba(255,255,255,.06); }
+  .cost-label { font-size:10px;color:#8B9BB4;margin-bottom:7px;font-family:'Space Mono',monospace; }
+  .cost-val { font-size:26px;font-weight:700;margin-bottom:4px; }
+  .cost-val.free { color:#57F287; } .cost-val.low { color:#D4A843; } .cost-val.mid { color:#FEE75C; }
+  .cost-note { font-size:11px;color:#8B9BB4;line-height:1.5; }
+
+  /* Divider */
+  .divider { height:1px;background:rgba(255,255,255,.06);margin:64px 0; }
+
+  /* Footer */
+  .footer { text-align:center;padding:40px 24px;font-family:'Space Mono',monospace;font-size:10px;color:#333;letter-spacing:2px; }
+
+  @media(max-width:700px) {
+    .method-grid { grid-template-columns:1fr; }
+    .pricing { grid-template-columns:1fr; }
+    .cost-grid { grid-template-columns:1fr; }
+    .cards { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-logo">AlphaScope</div>
+    <a class="nav-btn active" href="#chapter1">解釈まとめ</a>
+    <a class="nav-btn" href="#chapter2">技術・API</a>
+    <a class="nav-btn" href="#chapter3">AI会議可視化</a>
+    <a class="nav-btn" href="#chapter4">スポンサー後</a>
+  </div>
+</nav>
+
+<div class="main">
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- CHAPTER 1: 解釈まとめ -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="chapter" id="chapter1">
+    <div class="chapter-header">
+      <div class="chapter-num">CHAPTER 01</div>
+      <div>
+        <div class="chapter-title">AlphaScope 解釈まとめ</div>
+        <div class="chapter-desc">ミーティング内容整理 / Brain_auto_ai（田中）/ 2026.05.25</div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">01  /  AlphaScope の本質</div>
+      <div class="method" style="--accent:#D4A843;">
+        <div class="sum-item"><div class="sum-dot" style="background:#D4A843;"></div><div class="sum-text"><strong>自動で投資判断をするツールではなく</strong>、機関投資家レベルの情報処理をAIで再現し、ユーザーの投資レベルを数段階引き上げるサービス。</div></div>
+        <div class="sum-item"><div class="sum-dot" style="background:#D4A843;"></div><div class="sum-text">分析・収集は手段。最大の価値は<strong>「要約・翻訳」</strong>——複雑な情報を初心者でも理解できる言葉に変換すること。</div></div>
+        <div class="sum-item"><div class="sum-dot" style="background:#D4A843;"></div><div class="sum-text">AIが代わりに判断するのではなく、<strong>ユーザーが自分で判断できるようになる</strong>ことがゴール。</div></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">02  /  ブランド戦略 — 限定会員制</div>
+      <div class="method" style="--accent:#D4A843;">
+        <div class="sum-item"><div class="sum-dot" style="background:#D4A843;"></div><div class="sum-text">ホテル会員のような<strong>プレミアム会員制ブランド</strong>として展開。50名限定にすることで希少性と話題性を生む。</div></div>
+        <div class="sum-item"><div class="sum-dot" style="background:#D4A843;"></div><div class="sum-text">入口を選別することで<strong>クレカ審査のような緊張感</strong>を持たせ、「入れること自体」に価値が生まれる設計。</div></div>
+        <div class="sum-item"><div class="sum-dot" style="background:#D4A843;"></div><div class="sum-text">期が上がるごとに値上げ→<strong>早く入った人が得をする構造</strong>で初期メンバーへの特典感を演出。</div></div>
+        <div class="pricing" style="margin-top:16px;">
+          <div class="pc p1"><div class="pc-period">1期目</div><div class="pc-val">¥98,000</div><div class="pc-sub">50名限定</div></div>
+          <div class="pc p2"><div class="pc-period">2期目</div><div class="pc-val">¥148,000</div><div class="pc-sub">50名限定</div></div>
+          <div class="pc p3"><div class="pc-period">3期目</div><div class="pc-val">¥198,000</div><div class="pc-sub">50名限定</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">03  /  スケール設計</div>
+      <div class="method" style="--accent:#2D9E6B;">
+        <div class="flow">
+          <div class="flow-item"><div class="flow-left"><div class="flow-circle">🏛️</div><div class="flow-line"></div></div><div class="flow-content"><div class="flow-title">まずブランドを確立</div><div class="flow-desc">限定50名・高単価で「入れること自体に価値がある」状態を作る。最初から広く取りに行かない。</div></div></div>
+          <div class="flow-item"><div class="flow-left"><div class="flow-circle">🎯</div><div class="flow-line"></div></div><div class="flow-content"><div class="flow-title">UIで対象層を広げる</div><div class="flow-desc">中身のシステムは一つ。UIを初心者向け・中級者向けと変えることで複数の層に対応。開発コストを分散させない設計。</div></div></div>
+          <div class="flow-item"><div class="flow-left"><div class="flow-circle">🏢</div></div><div class="flow-content"><div class="flow-title">大企業・法人へ昇格</div><div class="flow-desc">大手が注目し始めたタイミングでシステムをエンタープライズ仕様に強化。「個人向けで実証済み」の実績が武器になる。</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">04  /  田中の役割イメージ</div>
+      <div class="role-box">
+        <div class="role-row"><div class="role-icon">⚙️</div><div class="role-text"><strong>思想を技術で実現する構築パートナー</strong>として、設計・実装・スケール設計まで一貫して関わる。</div></div>
+        <div class="role-row"><div class="role-icon">🧠</div><div class="role-text">自社で運用中の<strong>Brain・Sweepnews</strong>がAlphaScopeと同じ構造。実証済みの設計を応用できる。</div></div>
+        <div class="role-row"><div class="role-icon">🤝</div><div class="role-text">「言われたものを作る」ではなく、<strong>一緒に考えて進む</strong>スタンスで長期的に関わりたい。</div></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">05  /  現時点での課題</div>
+      <div class="method" style="--accent:#ED4245;">
+        <div class="sum-item"><div class="sum-dot" style="background:#ED4245;"></div><div class="sum-text"><strong>初期50名の集客</strong> — 98,000円を払える投資家層へのリーチ。村井さんの投資家ネットワークが最大の武器になる。</div></div>
+        <div class="sum-item"><div class="sum-dot" style="background:#ED4245;"></div><div class="sum-text"><strong>データ取得コスト</strong> — リアルタイム株価・SNSデータは有料APIが必須。Phase1は無料APIで代替し、収益が立ってから切り替える。</div></div>
+        <div class="sum-item"><div class="sum-dot" style="background:#ED4245;"></div><div class="sum-text"><strong>AIの精度と信頼性</strong> — 投資判断に関わるシステムのため、「あくまで情報提供・投資助言ではない」という設計を明確にする必要がある。</div></div>
+        <div class="sum-item"><div class="sum-dot" style="background:#FEE75C;"></div><div class="sum-text"><strong>ブランド確立までの期間</strong> — 初期メンバーに強い体験を届けることが口コミの起点になる。</div></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">06  /  田中からの提案</div>
+      <div class="method" style="--accent:#2D9E6B;">
+        <div class="sum-item"><div class="sum-dot" style="background:#2D9E6B;"></div><div class="sum-text"><strong>要約レイヤーを最優先で作る</strong> — ここを最初に完成させることでブランドの価値が証明できる。</div></div>
+        <div class="sum-item"><div class="sum-dot" style="background:#2D9E6B;"></div><div class="sum-text"><strong>AI会議プロセスの透明性を設計に組み込む</strong> — 「なぜその判断か」が見えることが高単価を正当化する。</div></div>
+        <div class="sum-item"><div class="sum-dot" style="background:#2D9E6B;"></div><div class="sum-text"><strong>Phase1はコスト最小で疑似版から始める</strong> — まず体験として成立する最小構成を早く動かし、Founderの反応を見てから投資を増やす。</div></div>
+        <div class="sum-item"><div class="sum-dot" style="background:#2D9E6B;"></div><div class="sum-text"><strong>Founder体験を特別なものにする</strong> — 「AI会議ログが全部見られる」「要望が反映される」など後から入れない特典を設ける。</div></div>
+        <div class="sum-item"><div class="sum-dot" style="background:#8a95ff;"></div><div class="sum-text"><strong>投資助言リスクの設計</strong> — 「情報提供・教育コンテンツ」として設計し、免責事項の整備を早めに検討したい。</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- CHAPTER 2: 技術・API -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="chapter" id="chapter2">
+    <div class="chapter-header">
+      <div class="chapter-num">CHAPTER 02</div>
+      <div>
+        <div class="chapter-title">技術・API 資料</div>
+        <div class="chapter-desc">システムを構成するAPI・ツール・コストの全体像</div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">01  /  全体の流れ</div>
+      <div style="display:flex;align-items:center;background:#1B2E45;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.06);flex-wrap:wrap;">
+        <div style="flex:1;min-width:140px;padding:18px 14px;text-align:center;border-right:1px solid rgba(255,255,255,.06);">
+          <div style="font-family:'Space Mono',monospace;font-size:9px;color:#D4A843;margin-bottom:6px;">STEP 01</div>
+          <div style="font-size:22px;margin-bottom:6px;">📡</div>
+          <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:4px;">データ収集</div>
+          <div style="font-size:11px;color:#8B9BB4;">J-Quants<br>EDINET<br>RSS</div>
+        </div>
+        <div style="color:#D4A843;font-size:18px;padding:0 4px;">→</div>
+        <div style="flex:1;min-width:140px;padding:18px 14px;text-align:center;border-right:1px solid rgba(255,255,255,.06);">
+          <div style="font-family:'Space Mono',monospace;font-size:9px;color:#D4A843;margin-bottom:6px;">STEP 02</div>
+          <div style="font-size:22px;margin-bottom:6px;">🧠</div>
+          <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:4px;">AI 会議</div>
+          <div style="font-size:11px;color:#8B9BB4;">Technical AI<br>Theme AI<br>Fundamentals AI</div>
+        </div>
+        <div style="color:#D4A843;font-size:18px;padding:0 4px;">→</div>
+        <div style="flex:1;min-width:140px;padding:18px 14px;text-align:center;border-right:1px solid rgba(255,255,255,.06);">
+          <div style="font-family:'Space Mono',monospace;font-size:9px;color:#D4A843;margin-bottom:6px;">STEP 03</div>
+          <div style="font-size:22px;margin-bottom:6px;">👑</div>
+          <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:4px;">最終判断</div>
+          <div style="font-size:11px;color:#8B9BB4;">DirectorAI<br>要約・翻訳<br>スコア算出</div>
+        </div>
+        <div style="color:#D4A843;font-size:18px;padding:0 4px;">→</div>
+        <div style="flex:1;min-width:140px;padding:18px 14px;text-align:center;border-right:1px solid rgba(255,255,255,.06);">
+          <div style="font-family:'Space Mono',monospace;font-size:9px;color:#D4A843;margin-bottom:6px;">STEP 04</div>
+          <div style="font-size:22px;margin-bottom:6px;">📲</div>
+          <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:4px;">配信</div>
+          <div style="font-size:11px;color:#8B9BB4;">LINE API<br>Discord API<br>Stripe</div>
+        </div>
+        <div style="color:#D4A843;font-size:18px;padding:0 4px;">→</div>
+        <div style="flex:1;min-width:140px;padding:18px 14px;text-align:center;">
+          <div style="font-family:'Space Mono',monospace;font-size:9px;color:#D4A843;margin-bottom:6px;">STEP 05</div>
+          <div style="font-size:22px;margin-bottom:6px;">⚙️</div>
+          <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:4px;">自動実行</div>
+          <div style="font-size:11px;color:#8B9BB4;">GitHub Actions<br>毎朝7時<br>完全自動</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">02  /  データ取得 API</div>
+      <div class="cards">
+        <div class="card" style="--accent:#57F287;"><div class="card-tag">日本株データ</div><div class="card-name">J-Quants</div><div class="card-desc">金融庁系の日本株データAPI。株価・出来高・財務情報を取得できる。無料枠あり。</div><div class="badge-row"><span class="badge bf">無料枠あり</span><span class="badge br">Phase1から</span></div><div class="dr"><span class="dk">取得できるもの</span><span class="dv">株価・出来高・財務</span></div><div class="dr"><span class="dk">リアルタイム</span><span class="dv y">翌日データ（無料）</span></div><div class="dr"><span class="dk">コスト</span><span class="dv g">¥0〜</span></div></div>
+        <div class="card" style="--accent:#57F287;"><div class="card-tag">IR・財務情報</div><div class="card-name">EDINET API</div><div class="card-desc">金融庁公式の有価証券報告書・決算短信DB。完全無料。</div><div class="badge-row"><span class="badge bf">完全無料</span><span class="badge br">Phase1から</span></div><div class="dr"><span class="dk">取得できるもの</span><span class="dv">決算・IR文書</span></div><div class="dr"><span class="dk">コスト</span><span class="dv g">¥0（公式）</span></div><div class="dr"><span class="dk">注意</span><span class="dv y">XML形式で複雑</span></div></div>
+        <div class="card" style="--accent:#57F287;"><div class="card-tag">ニュース収集</div><div class="card-name">RSS 収集</div><div class="card-desc">各メディアのRSSフィードから自動収集。Sweepnewsで100以上のソースで実証済み。</div><div class="badge-row"><span class="badge bf">完全無料</span><span class="badge bf">実証済み</span></div><div class="dr"><span class="dk">コスト</span><span class="dv g">¥0</span></div><div class="dr"><span class="dk">速報性</span><span class="dv y">やや遅れる</span></div></div>
+        <div class="card" style="--accent:#FEE75C;"><div class="card-tag">リアルタイム株価</div><div class="card-name">みんかぶ / SBI 系</div><div class="card-desc">本格運用時に必要なリアルタイム株価。有料プランが必須。</div><div class="badge-row"><span class="badge bp">有料</span><span class="badge bl">Phase2以降</span></div><div class="dr"><span class="dk">コスト目安</span><span class="dv y">要見積もり</span></div><div class="dr"><span class="dk">判断</span><span class="dv">予算確定後に選定</span></div></div>
+        <div class="card" style="--accent:#ED4245;"><div class="card-tag">SNS データ</div><div class="card-name">Twitter（X）API</div><div class="card-desc">2023年の有料化で月10万円以上。当面スキップ推奨。</div><div class="badge-row"><span class="badge bp">高額有料</span><span class="badge bl">当面スキップ</span></div><div class="dr"><span class="dk">コスト</span><span class="dv r">月〜¥100,000</span></div><div class="dr"><span class="dk">代替</span><span class="dv">Reddit（無料）</span></div></div>
+        <div class="card" style="--accent:#8a95ff;"><div class="card-tag">SNS 代替</div><div class="card-name">Reddit API</div><div class="card-desc">海外投資家コミュニティの声を無料取得。日本語は少ないが参考値として活用可。</div><div class="badge-row"><span class="badge bf">無料枠あり</span><span class="badge bl">Phase2で検討</span></div><div class="dr"><span class="dk">コスト</span><span class="dv g">無料〜低コスト</span></div></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">03  /  配信・インフラ</div>
+      <div class="cards">
+        <div class="card" style="--accent:#00B900;"><div class="card-tag">ユーザー通知</div><div class="card-name">LINE Messaging API</div><div class="card-desc">ユーザーのLINEに直接メッセージを送るAPI。日本ユーザーへの配信に最適。</div><div class="badge-row"><span class="badge bf">無料枠広い</span><span class="badge br">Phase1から</span></div><div class="dr"><span class="dk">月の無料送信数</span><span class="dv g">200通まで無料</span></div><div class="dr"><span class="dk">超過時</span><span class="dv y">〜¥15,000/月</span></div></div>
+        <div class="card" style="--accent:#5865F2;"><div class="card-tag">AI会議の詳細配信</div><div class="card-name">Discord API</div><div class="card-desc">チャンネルに自動投稿できるAPI。Founderメンバーへの配信に最適。</div><div class="badge-row"><span class="badge bf">完全無料</span><span class="badge br">Phase1から</span></div><div class="dr"><span class="dk">コスト</span><span class="dv g">¥0</span></div><div class="dr"><span class="dk">難易度</span><span class="dv">低</span></div></div>
+        <div class="card" style="--accent:#635BFF;"><div class="card-tag">課金・サブスク</div><div class="card-name">Stripe</div><div class="card-desc">世界標準の決済サービス。月額サブスクの管理・課金・解約を自動化できる。</div><div class="badge-row"><span class="badge bf">初期費用¥0</span><span class="badge bl">Phase2で実装</span></div><div class="dr"><span class="dk">手数料</span><span class="dv y">売上の3.6%</span></div></div>
+        <div class="card" style="--accent:#24292e;"><div class="card-tag">自動実行エンジン</div><div class="card-name">GitHub Actions</div><div class="card-desc">毎朝自動で実行する仕組み。Brainでも使用中。無料枠で十分まかなえる。</div><div class="badge-row"><span class="badge bf">無料枠で十分</span><span class="badge bf">実証済み</span></div><div class="dr"><span class="dk">無料枠</span><span class="dv g">月2,000分</span></div></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">04  /  AI モデル選定</div>
+      <div class="table-wrap">
+        <table>
+          <tr><th>用途</th><th>モデル</th><th>理由</th><th>コスト</th><th>フェーズ</th></tr>
+          <tr><td class="tn">4AIの分析・要約</td><td>Claude Haiku</td><td>日本語の精度が高い。要約品質◎</td><td class="ty">$0.80/100万文字</td><td class="tg">Phase1〜</td></tr>
+          <tr><td class="tn">大量データ処理</td><td>Qwen3（無料版）</td><td>Brainで実証済み。大量処理を無料で回せる</td><td class="tg">¥0（完全無料）</td><td class="tg">Phase1〜</td></tr>
+          <tr><td class="tn">DirectorAIの最終判断</td><td>Claude Sonnet</td><td>複雑な統合・判断には高性能モデルが必要</td><td class="ty">$3.00/100万文字</td><td class="ty">Phase2〜</td></tr>
+          <tr><td class="tn">初心者向け翻訳</td><td>Claude Haiku</td><td>コスト効率よく、わかりやすい文章生成</td><td class="tg">低コスト</td><td class="tg">Phase1〜</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">05  /  コスト概算</div>
+      <div class="cost-grid">
+        <div class="cost-card"><div class="cost-label">PHASE 1（MVP）</div><div class="cost-val free">〜¥3,000</div><div class="cost-note">月額/100ユーザー想定<br>GitHub Actions + LINE + AI APIのみ</div></div>
+        <div class="cost-card"><div class="cost-label">PHASE 2（β版）</div><div class="cost-val low">〜¥20,000</div><div class="cost-note">月額/1,000ユーザー想定<br>Stripe・株価API追加後</div></div>
+        <div class="cost-card"><div class="cost-label">PHASE 3（スケール）</div><div class="cost-val mid">要設計</div><div class="cost-note">ユーザー数・リアルタイム処理<br>の規模によって変動</div></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">06  /  有料プランにすると何が変わるか</div>
+      <div class="table-wrap">
+        <table>
+          <tr><th>API</th><th>無料でできること</th><th>有料にすると追加できること</th><th>費用目安</th><th>おすすめ時期</th></tr>
+          <tr><td class="tn">J-Quants</td><td class="tgr">前日の株価・基本財務</td><td>リアルタイム株価・先物・オプション情報</td><td class="ty">月¥3,000〜</td><td>Founder反応見てから</td></tr>
+          <tr><td class="tn">LINE API</td><td class="tgr">月200通まで</td><td>送信数無制限・リッチメニュー・ユーザー分析</td><td class="ty">月¥5,000〜¥15,000</td><td>ユーザー200人超えたら</td></tr>
+          <tr><td class="tn">Claude API</td><td class="tgr">従量課金</td><td>優先処理・バッチ処理割引（50%OFF）</td><td class="ty">使用量次第</td><td>大量処理が必要になったら</td></tr>
+          <tr><td class="tn">リアルタイム株価</td><td class="tr">無料枠なし</td><td>リアルタイム株価・板情報・空売り残高</td><td class="tr">月¥10,000〜</td><td>Phase3・資金確保後</td></tr>
+          <tr><td class="tn">Twitter（X）</td><td class="tr">ほぼ使えない</td><td>投資家の投稿収集・センチメント分析</td><td class="tr">月¥100,000〜</td><td>スケール後・要予算判断</td></tr>
+          <tr><td class="tn">OpenAI（GPT）</td><td class="tgr">従量課金</td><td>チャート画像をAIが視覚的に読む</td><td class="ty">従量課金</td><td>差別化機能として検討</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- CHAPTER 3: AI会議可視化 -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="chapter" id="chapter3">
+    <div class="chapter-header">
+      <div class="chapter-num">CHAPTER 03</div>
+      <div>
+        <div class="chapter-title">AI会議の可視化設計</div>
+        <div class="chapter-desc">4つのAIが会議している様子をユーザーにどう見せるか</div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">01  /  方法別の詳細設計</div>
+
+      <div class="method" style="--accent:#5865F2;">
+        <div class="method-header"><div class="method-num">METHOD 01</div><div><div class="method-title">Discord チャンネルに順番投稿</div><div class="method-sub">最もシンプル・Phase1で即実装できる</div></div></div>
+        <div class="timeline">
+          <div class="tl-label">会議の流れ（ユーザーが見る画面）</div>
+          <div class="tl-item"><div class="tl-left"><div class="tl-dot" style="background:#5865F2;"></div><div class="tl-line" style="background:#5865F2;"></div></div><div class="tl-time">07:00</div><div style="flex:1;"><div class="tl-name" style="color:#8a95ff;">📈 Technical AI</div><div class="tl-desc">「トヨタ自動車：200日移動平均を上抜け。RSI=58。買い圧力継続中。」</div></div></div>
+          <div class="tl-item"><div class="tl-left"><div class="tl-dot" style="background:#57F287;"></div><div class="tl-line" style="background:#57F287;"></div></div><div class="tl-time">07:01</div><div style="flex:1;"><div class="tl-name" style="color:#57F287;">🌐 Theme AI</div><div class="tl-desc">「EV・電動化関連ニュースが48時間で+340件。センチメントはポジティブ優勢。」</div></div></div>
+          <div class="tl-item"><div class="tl-left"><div class="tl-dot" style="background:#FEE75C;"></div><div class="tl-line" style="background:#FEE75C;"></div></div><div class="tl-time">07:02</div><div style="flex:1;"><div class="tl-name" style="color:#FEE75C;">📊 Fundamentals AI</div><div class="tl-desc">「PER14倍で同業比割安。決算は市場予想超え。円安依存度に注意。」</div></div></div>
+          <div class="tl-item"><div class="tl-left"><div class="tl-dot" style="background:#D4A843;"></div></div><div class="tl-time">07:03</div><div style="flex:1;"><div class="tl-name" style="color:#D4A843;">👑 DirectorAI — 最終判断</div><div class="tl-desc">「3AIの合議：買い注目（確信度72%）。割安で向かい風が少ない。中長期目線の銘柄。」</div></div></div>
+        </div>
+        <div class="method-grid" style="margin-top:16px;">
+          <div class="method-box"><div class="box-title g">メリット</div><div class="bi"><div class="bd g"></div>実装が最もシンプルで速い</div><div class="bi"><div class="bd g"></div>リアルタイム感が自然に出る</div><div class="bi"><div class="bd g"></div>Discord自体が無料</div></div>
+          <div class="method-box"><div class="box-title y">デメリット</div><div class="bi"><div class="bd y"></div>Discordアカウントが必要</div><div class="bi"><div class="bd y"></div>過去ログが埋もれやすい</div><div class="bi"><div class="bd y"></div>UIの自由度が低い</div></div>
+        </div>
+        <div class="pb-row"><span class="pb g">Phase1から実装可</span><span class="pb b">実装コスト：低</span><span class="pb g">Founder向けに最適</span></div>
+      </div>
+
+      <div class="method" style="--accent:#D4A843;">
+        <div class="method-header"><div class="method-num">METHOD 02</div><div><div class="method-title">会員専用Webページに会議ログを表示</div><div class="method-sub">UIの自由度が高い・ブランド感を出しやすい</div></div></div>
+        <div class="method-grid">
+          <div class="method-box"><div class="box-title g">メリット</div><div class="bi"><div class="bd g"></div>デザイン・UIを自由に作れる</div><div class="bi"><div class="bd g"></div>過去ログを全件保存・検索できる</div><div class="bi"><div class="bd g"></div>ブランド感を演出しやすい</div><div class="bi"><div class="bd g"></div>会員認証と連動できる</div></div>
+          <div class="method-box"><div class="box-title y">デメリット</div><div class="bi"><div class="bd y"></div>データベース・サーバーが必要</div><div class="bi"><div class="bd y"></div>実装コストが上がる</div><div class="bi"><div class="bd r"></div>Phase1では時間的に難しい</div></div>
+        </div>
+        <div class="pb-row"><span class="pb y">Phase2以降推奨</span><span class="pb y">実装コスト：中</span><span class="pb b">ブランド感◎</span></div>
+      </div>
+
+      <div class="method" style="--accent:#00B900;">
+        <div class="method-header"><div class="method-num">METHOD 03</div><div><div class="method-title">LINEで会議の進行をリアルタイム通知</div><div class="method-sub">ユーザーが会議を「追体験」できる設計</div></div></div>
+        <div class="method-grid">
+          <div class="method-box"><div class="box-title g">メリット</div><div class="bi"><div class="bd g"></div>会議をリアルタイムで追体験できる</div><div class="bi"><div class="bd g"></div>LINEはすでに実装予定</div><div class="bi"><div class="bd g"></div>通知が来るたびに期待感が生まれる</div></div>
+          <div class="method-box"><div class="box-title y">デメリット</div><div class="bi"><div class="bd y"></div>通知が多いと邪魔に感じる人も</div><div class="bi"><div class="bd y"></div>LINE送信数が増えてコストが上がる</div><div class="bi"><div class="bd y"></div>詳細ログはLINEでは見にくい</div></div>
+        </div>
+        <div class="pb-row"><span class="pb y">Phase2以降推奨</span><span class="pb g">体験設計◎</span></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">02  /  方法の比較</div>
+      <div class="table-wrap">
+        <table>
+          <tr><th>項目</th><th>Discord投稿</th><th>会員Webページ</th><th>LINE段階通知</th></tr>
+          <tr><td class="tn">実装の速さ</td><td class="tg">◎ 最速</td><td class="ty">△ 時間かかる</td><td class="ty">○ やや時間かかる</td></tr>
+          <tr><td class="tn">実装コスト</td><td class="tg">◎ 低い</td><td class="ty">△ 中程度</td><td class="ty">△ 中程度</td></tr>
+          <tr><td class="tn">ブランド感</td><td class="ty">○ 普通</td><td class="tg">◎ 高い</td><td class="tg">◎ 高い</td></tr>
+          <tr><td class="tn">過去ログ保存</td><td class="ty">○ Discordに残る</td><td class="tg">◎ 検索・管理できる</td><td class="tr">✗ 残らない</td></tr>
+          <tr><td class="tn">追加コスト</td><td class="tg">¥0</td><td class="ty">月数千円〜</td><td class="ty">送信数次第</td></tr>
+          <tr><td class="tn">推奨フェーズ</td><td class="tg">Phase1〜</td><td class="ty">Phase2〜</td><td class="ty">Phase2〜</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">03  /  推奨設計（段階的に組み合わせる）</div>
+      <div class="recommend">
+        <div class="rec-label">RECOMMENDATION</div>
+        <div class="rec-title">Phase別に組み合わせて使う</div>
+        <div class="rec-item"><div class="rec-icon">🟢</div><div class="rec-text"><strong>Phase1：Discordのみ</strong> — まずFounder50名にDiscordで会議ログを届ける。実装が最速。コスト¥0。</div></div>
+        <div class="rec-item"><div class="rec-icon">🟡</div><div class="rec-text"><strong>Phase2：Discord＋LINE通知</strong> — 朝の段階通知をLINEで、詳細はDiscordへ誘導。「LINEで概要→Discordで詳細」の2層設計。</div></div>
+        <div class="rec-item"><div class="rec-icon">🔵</div><div class="rec-text"><strong>Phase3：会員Webページを追加</strong> — ブランドが確立し、ユーザーが増えたタイミングで専用サイトを構築。</div></div>
+        <div class="rec-item"><div class="rec-icon">⭐</div><div class="rec-text"><strong>最終形：全部連携</strong> — LINE（通知）→Discord（会議ログ）→Webページ（詳細・過去ログ・個人設定）の3層がシームレスにつながった状態。</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- CHAPTER 4: スポンサー後 -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="chapter" id="chapter4">
+    <div class="chapter-header">
+      <div class="chapter-num">CHAPTER 04</div>
+      <div>
+        <div class="chapter-title">スポンサー収益獲得後の拡張設計</div>
+        <div class="chapter-desc">コスト制約がなくなった場合の完成形</div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">01  /  データ取得の拡張</div>
+      <div class="method" style="--accent:#57F287;">
+        <div class="method-grid">
+          <div class="method-box"><div class="box-title g">解禁できるAPI</div><div class="bi"><div class="bd g"></div>Twitter APIを解禁→投資家センチメントをリアルタイム収集</div><div class="bi"><div class="bd g"></div>Bloomberg APIで本格リアルタイム株価</div><div class="bi"><div class="bd g"></div>NYSE・NASDAQの海外データ追加</div><div class="bi"><div class="bd g"></div>決算発表・IR資料のリアルタイム取得</div></div>
+          <div class="method-box"><div class="box-title b">追加できる情報源</div><div class="bi"><div class="bd g"></div>機関投資家の大量保有報告書（自動収集）</div><div class="bi"><div class="bd g"></div>空売り残高データ（日証金）</div><div class="bi"><div class="bd g"></div>信用残・信用倍率の自動監視</div><div class="bi"><div class="bd g"></div>板情報・注文フローの分析</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">02  /  AIの強化</div>
+      <div class="method" style="--accent:#8a95ff;">
+        <div class="method-grid">
+          <div class="method-box"><div class="box-title g">AIの強化内容</div><div class="bi"><div class="bd g"></div>Claude Sonnetを全工程で使用（コスト妥協なし）</div><div class="bi"><div class="bd g"></div>GPT-4o Visionを追加→チャート画像をAIが視覚的に読む</div><div class="bi"><div class="bd g"></div>ファインチューニングで独自の投資分析モデルを育てる</div></div>
+          <div class="method-box"><div class="box-title b">追加できる機能</div><div class="bi"><div class="bd g"></div>音声読み上げ（通勤中に聴ける）</div><div class="bi"><div class="bd g"></div>チャート画像の自動生成・解説</div><div class="bi"><div class="bd g"></div>過去データとの比較分析（類似パターン検索）</div><div class="bi"><div class="bd g"></div>個人ポートフォリオへの影響シミュレーション</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">03  /  インフラ・UXの本格化</div>
+      <div class="method" style="--accent:#D4A843;">
+        <div class="method-grid">
+          <div class="method-box"><div class="box-title g">インフラ移行先</div><div class="bi"><div class="bd g"></div>GitHub Actions → AWS・GCPに移行</div><div class="bi"><div class="bd g"></div>リアルタイム処理・大量同時接続に対応</div><div class="bi"><div class="bd g"></div>本格的なデータベース（RDS・BigQuery）に切り替え</div><div class="bi"><div class="bd g"></div>金融系セキュリティ基準への対応</div></div>
+          <div class="method-box"><div class="box-title b">UXの完成形</div><div class="bi"><div class="bd g"></div>会員専用Webアプリを早期構築</div><div class="bi"><div class="bd g"></div>プッシュ通知・音声読み上げ対応</div><div class="bi"><div class="bd g"></div>ポートフォリオ連動→「保有株への影響」を表示</div><div class="bi"><div class="bd g"></div>法人向けAPI提供・ホワイトラベル展開</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">04  /  コスト制約なし時の完成形フロー</div>
+      <div class="timeline">
+        <div class="tl-label">スポンサー収益獲得後の全体設計</div>
+        <div class="tl-item"><div class="tl-left"><div class="tl-dot" style="background:#57F287;"></div><div class="tl-line" style="background:#57F287;"></div></div><div class="tl-time">収集</div><div style="flex:1;"><div class="tl-name" style="color:#57F287;">リアルタイムデータ取得</div><div class="tl-desc">株価・IR・Twitter・Bloomberg・海外市場を24時間自動収集</div></div></div>
+        <div class="tl-item"><div class="tl-left"><div class="tl-dot" style="background:#8a95ff;"></div><div class="tl-line" style="background:#8a95ff;"></div></div><div class="tl-time">分析</div><div style="flex:1;"><div class="tl-name" style="color:#8a95ff;">4AI＋画像AIが並列処理</div><div class="tl-desc">チャート画像・テキスト・センチメントを同時分析。Claude Sonnet全工程使用</div></div></div>
+        <div class="tl-item"><div class="tl-left"><div class="tl-dot" style="background:#D4A843;"></div><div class="tl-line" style="background:#D4A843;"></div></div><div class="tl-time">判断</div><div style="flex:1;"><div class="tl-name" style="color:#D4A843;">DirectorAIが統合・要約</div><div class="tl-desc">全データを統合し、ユーザーの投資スタイルに合わせた個別要約を生成</div></div></div>
+        <div class="tl-item"><div class="tl-left"><div class="tl-dot" style="background:#00B900;"></div></div><div class="tl-time">配信</div><div style="flex:1;"><div class="tl-name" style="color:#00B900;">LINE・Discord・Webアプリ・音声で届ける</div><div class="tl-desc">ユーザーが好きなチャンネルで受け取れる。急騰・急落時はリアルタイムアラート</div></div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">AlphaScope 総合資料  —  Brain_auto_ai（田中）  |  2026.05.25</div>
+
+<script>
+  // Nav active state on scroll
+  const chapters = document.querySelectorAll('.chapter');
+  const navBtns = document.querySelectorAll('.nav-btn');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    chapters.forEach(ch => {
+      if (window.scrollY >= ch.offsetTop - 100) current = ch.id;
+    });
+    navBtns.forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('href') === '#' + current);
+    });
+  });
+</script>
+
+</body>
+</html>
